@@ -12,6 +12,8 @@
     </parent>
 
     <artifactId>service-product</artifactId>
+    <name>service-product</name>
+    <description>商品服务</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

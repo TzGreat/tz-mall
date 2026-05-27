@@ -1,6 +1,6 @@
 package com.exception;
 
-import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.BlockExceptionHandler;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.example.commen.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 public class MyBlockExceptionHandler implements BlockExceptionHandler {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Override
-    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String s, BlockException e) throws Exception {
+    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, BlockException e) throws Exception {
         PrintWriter writer=httpServletResponse.getWriter();
 
         httpServletResponse.setContentType("application/json;charset=UTF-8");

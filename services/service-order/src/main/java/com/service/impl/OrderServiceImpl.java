@@ -33,7 +33,6 @@ public class OrderServiceImpl implements OrderService {
     @SentinelResource(value = "createOrder")
     @Override
     public Order create(Long productId, Long userId) {
-        //Product p = getProductFromRemoteWithLoadBalanceA(productId);
         Product p = productFeignClient.getProductById(productId);
 
         Order order = new Order();
@@ -54,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
         List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
         ServiceInstance instance = instances.get(0);
 
-        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/product/" + productId;
+        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/api/product/product/" + productId;
 
         log.info("从远程服务获取商品:{}", url);
         Product product = restTemplate.getForObject(url, Product.class);
@@ -65,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
     private Product getProductFromRemoteWithLoadBalance(long productId) {
         ServiceInstance choose = loadBalancerClient.choose("service-product");
 
-        String url = "http://" + choose.getHost() + ":" + choose.getPort() + "/product/" + productId;
+        String url = "http://" + choose.getHost() + ":" + choose.getPort() + "/api/product/product/" + productId;
         log.info("从远程服务获取商品:{}", url);
         Product product = restTemplate.getForObject(url, Product.class);
         return product;
@@ -73,8 +72,28 @@ public class OrderServiceImpl implements OrderService {
 
     //基于注解负载均衡
     private Product getProductFromRemoteWithLoadBalanceA(long productId) {
-        //动态替换
-        String url = "http://service-product/product/" + productId;
+        // 使用 DiscoveryClient 直接获取实例，不依赖 LoadBalancer
+        List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
+        if (instances.isEmpty()) {
+            throw new RuntimeException("未找到 service-product 服务实例");
+        }
+        // 简单的轮询策略
+        ServiceInstance instance = instances.get(0);
+        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/api/product/product/" + productId;
+        Product product = restTemplate.getForObject(url, Product.class);
+        return product;
+    }
+
+    //使用 DiscoveryClient 直接获取实例（不依赖 LoadBalancer）
+    private Product getProductFromDiscoveryClient(long productId) {
+        List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
+        if (instances.isEmpty()) {
+            throw new RuntimeException("未找到 service-product 服务实例");
+        }
+        //简单的轮询策略（取第一个实例）
+        ServiceInstance instance = instances.get(0);
+        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/api/product/product/" + productId;
+        log.info("从服务实例获取商品: {}", url);
         Product product = restTemplate.getForObject(url, Product.class);
         return product;
     }

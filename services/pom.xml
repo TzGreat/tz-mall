@@ -12,6 +12,8 @@
     </parent>
 
     <artifactId>services</artifactId>
+    <name>services</name>
+    <description>业务服务聚合模块</description>
     <packaging>pom</packaging>
 
     <!-- 声明子模块 -->
@@ -50,6 +52,7 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

@@ -11,6 +11,8 @@
     </parent>
 
     <artifactId>model</artifactId>
+    <name>model</name>
+    <description>模型模块</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

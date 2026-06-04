@@ -54,8 +54,14 @@ application-local.properties
 
 # Docker
 docker-compose.override.yml
-# Compiled class files
-*.class
+
+# Frontend
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
 
 # Log files
 *.log

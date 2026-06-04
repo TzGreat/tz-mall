@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # ==================== Nacos 配置中心 ====================
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: tz-nacos
+    environment:
+      - MODE=standalone
+      - PREFER_HOST_MODE=hostname
+      - JVM_XMS=256m
+      - JVM_XMX=512m
+      - JVM_XMN=128m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - ./nacos/logs:/home/nacos/logs
+    restart: unless-stopped
+    networks:
+      - tz-mall-network
+
+  # ==================== RabbitMQ 消息队列 ====================
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: tz-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    ports:
+      - "5672:5672"      # AMQP 协议端口
+      - "15672:15672"    # 管理界面端口
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+      - ./rabbitmq/logs:/var/log/rabbitmq
+    restart: unless-stopped
+    networks:
+      - tz-mall-network
+
+  # ==================== Elasticsearch 搜索引擎 ====================
+  elasticsearch:
+    image: elasticsearch:8.12.2
+    container_name: tz-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/plugins:/usr/share/elasticsearch/plugins
+    restart: unless-stopped
+    networks:
+      - tz-mall-network
+
+  # ==================== Sentinel 控制台 ====================
+  sentinel:
+    image: bladex/sentinel-dashboard:1.8.8
+    container_name: tz-sentinel
+    environment:
+      - JAVA_OPTS=-Dserver.port=8858 -Dcsp.sentinel.dashboard.server=localhost:8858
+    ports:
+      - "8858:8858"
+    restart: unless-stopped
+    networks:
+      - tz-mall-network
+
+  # ==================== Seata 分布式事务 ====================
+  seata:
+    image: seataio/seata-server:2.0.0
+    container_name: tz-seata
+    environment:
+      - SEATA_PORT=8091
+      - STORE_MODE=file
+    ports:
+      - "8091:8091"
+      - "7091:7091"
+    volumes:
+      - ./seata/logs:/root/logs
+    restart: unless-stopped
+    networks:
+      - tz-mall-network
+
+networks:
+  tz-mall-network:
+    driver: bridge

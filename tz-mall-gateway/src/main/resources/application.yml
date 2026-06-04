@@ -1,0 +1,66 @@
+server:
+  port: 9000
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: service-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: service-user
+          uri: lb://service-user
+          predicates:
+            - Path=/api/user/**
+        - id: service-admin
+          uri: lb://service-user
+          predicates:
+            - Path=/api/admin/**
+        - id: service-item
+          uri: lb://service-item
+          predicates:
+            - Path=/api/item/**
+        - id: service-order
+          uri: lb://service-order
+          predicates:
+            - Path=/api/order/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: '*'
+            allowedMethods: '*'
+            allowedHeaders: '*'
+            allowCredentials: true
+            maxAge: 3600
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      password:
+
+auth:
+  whitelist:
+    - /api/user/register
+    - /api/user/login
+    - /api/item/list
+    - /api/item/search
+    # Knife4j / Swagger UI 入口及静态资源（网关转发后保留原路径访问）
+    - /doc.html
+    - /doc.html/**
+    - /swagger-ui/**
+    - /swagger-ui.html
+    - /v3/api-docs/**
+    - /v3/api-docs
+    - /webjars/**
+    - /swagger-resources/**
+    - /favicon.ico
